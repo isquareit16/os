@@ -1,0 +1,55 @@
+//server.c
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/ipc.h>
+#include <sys/shm.h>
+#include <sys/types.h>
+
+#define SHM_SIZE 1024
+
+int main() {
+    key_t key;
+    int shmid;
+    char *str;
+
+    key = ftok("shmfile", 65);
+    shmid = shmget(key, SHM_SIZE, 0666 | IPC_CREAT);
+    str = (char*) shmat(shmid, NULL, 0);
+
+    printf("Enter a message to write into shared memory:\n");
+    fgets(str, SHM_SIZE, stdin);
+
+    printf("\nData written in shared memory: %s\n", str);
+
+    shmdt(str);
+
+    return 0;
+}
+
+
+//client.c
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/ipc.h>
+#include <sys/shm.h>
+#include <sys/types.h>
+
+#define SHM_SIZE 1024
+
+int main() {
+    key_t key;
+    int shmid;
+    char *str;
+
+    key = ftok("shmfile", 65);
+    shmid = shmget(key, SHM_SIZE, 0666);
+    str = (char*) shmat(shmid, NULL, 0);
+
+    printf("\nData read from shared memory: %s\n", str);
+
+    shmdt(str);
+    shmctl(shmid, IPC_RMID, NULL);
+
+    return 0;
+}
