@@ -1,0 +1,85 @@
+#include <stdio.h>
+
+void RoundRobin() {
+    int n, tq;
+    printf("\nEnter number of processes: ");
+    scanf("%d", &n);
+
+    int at[n], bt[n], rt[n], wt[n], tat[n], ft[n];
+    int completed = 0, time = 0;
+    float totalWT = 0, totalTAT = 0;
+
+    printf("Enter Arrival Time (AT) and Burst Time (BT) for each process:\n");
+    for (int i = 0; i < n; i++) {
+        printf("P%d AT: ", i + 1);
+        scanf("%d", &at[i]);
+        printf("P%d BT: ", i + 1);
+        scanf("%d", &bt[i]);
+        rt[i] = bt[i];
+        wt[i] = tat[i] = ft[i] = 0;
+    }
+
+    printf("Enter Time Quantum (TQ): ");
+    scanf("%d", &tq);
+
+    printf("\nGantt Chart:\n");
+
+    while (completed < n) {
+        int done = 0;
+
+        for (int i = 0; i < n; i++) {
+            if (rt[i] > 0 && at[i] <= time) {
+                printf("P%d ", i + 1);
+                done = 1;
+
+                if (rt[i] > tq) {
+                    time += tq;
+                    rt[i] -= tq;
+                } else {
+                    time += rt[i];
+                    rt[i] = 0;
+                    completed++;
+                    ft[i] = time;
+                    tat[i] = ft[i] - at[i];
+                    wt[i] = tat[i] - bt[i];
+                    totalWT += wt[i];
+                    totalTAT += tat[i];
+                }
+            }
+        }
+
+        if (!done)
+            time++;
+    }
+
+    printf("\n\nProcess\tAT\tBT\tWT\tTAT\n");
+    for (int i = 0; i < n; i++)
+        printf("P%d\t%d\t%d\t%d\t%d\n", i + 1, at[i], bt[i], wt[i], tat[i]);
+
+    printf("\nAverage Waiting Time: %.2f", totalWT / n);
+    printf("\nAverage Turnaround Time: %.2f\n", totalTAT / n);
+}
+
+int main() {
+    int choice;
+    do {
+        printf("\n====== CPU Scheduling Algorithms ======\n");
+        printf("1. Round Robin (with Arrival Time)\n");
+        printf("2. Exit\n");
+        printf("Enter your choice: ");
+        scanf("%d", &choice);
+
+        switch (choice) {
+            case 1:
+                RoundRobin();
+                break;
+            case 2:
+                printf("Exiting program...\n");
+                break;
+            default:
+                printf("Invalid choice! Try again.\n");
+        }
+    } while (choice != 2);
+
+    return 0;
+}
