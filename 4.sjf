@@ -1,0 +1,67 @@
+#include <stdio.h>
+#include <limits.h>
+
+void SJF_Preemptive() {
+    int n;
+    printf("\nEnter number of processes: ");
+    scanf("%d", &n);
+
+    int at[n], bt[n], rt[n], wt[n], tat[n], ft[n];
+    int completed = 0, time = 0, shortest = -1;
+    int minRT = INT_MAX;
+    float totalWT = 0, totalTAT = 0;
+
+    printf("Enter Arrival Time (AT) and Burst Time (BT) for each process:\n");
+    for (int i = 0; i < n; i++) {
+        printf("P%d AT: ", i + 1);
+        scanf("%d", &at[i]);
+        printf("P%d BT: ", i + 1);
+        scanf("%d", &bt[i]);
+        rt[i] = bt[i];
+    }
+
+    printf("\nGantt Chart:\n");
+
+    while (completed != n) {
+        shortest = -1;
+        minRT = INT_MAX;
+
+        for (int i = 0; i < n; i++) {
+            if (at[i] <= time && rt[i] > 0 && rt[i] < minRT) {
+                minRT = rt[i];
+                shortest = i;
+            }
+        }
+
+        if (shortest == -1) {
+            time++;
+            continue;
+        }
+
+        printf("P%d ", shortest + 1);
+        rt[shortest]--;
+        time++;
+
+        if (rt[shortest] == 0) {
+            completed++;
+            ft[shortest] = time;
+            tat[shortest] = ft[shortest] - at[shortest];
+            wt[shortest] = tat[shortest] - bt[shortest];
+            totalWT += wt[shortest];
+            totalTAT += tat[shortest];
+        }
+    }
+
+    printf("\n\nProcess\tAT\tBT\tWT\tTAT\n");
+    for (int i = 0; i < n; i++) {
+        printf("P%d\t%d\t%d\t%d\t%d\n", i + 1, at[i], bt[i], wt[i], tat[i]);
+    }
+
+    printf("\nAverage Waiting Time: %.2f", totalWT / n);
+    printf("\nAverage Turnaround Time: %.2f\n", totalTAT / n);
+}
+
+int main() {
+    SJF_Preemptive();
+    return 0;
+}
