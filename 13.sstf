@@ -1,0 +1,70 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
+
+void sort(int arr[], int n) {
+    int temp;
+    for(int i = 0; i < n - 1; i++) {
+        for(int j = 0; j < n - i - 1; j++) {
+            if(arr[j] > arr[j + 1]) {
+                temp = arr[j];
+                arr[j] = arr[j + 1];
+                arr[j + 1] = temp;
+            }
+        }
+    }
+}
+
+void sstf(int req[], int n, int head) {
+    int visited[100] = {0};
+    int total = 0, count = 0, pos, min, diff;
+
+    printf("\nSSTF Sequence: %d", head);
+
+    while(count < n) {
+        min = 9999;
+        pos = -1;
+        for(int i = 0; i < n; i++) {
+            if(!visited[i]) {
+                diff = abs(req[i] - head);
+                if(diff < min) {
+                    min = diff;
+                    pos = i;
+                }
+            }
+        }
+        total += min;
+        head = req[pos];
+        visited[pos] = 1;
+        printf(" -> %d", head);
+        count++;
+    }
+    printf("\nTotal Head Movement = %d\n", total);
+}
+  int main() {
+    int n, head, disk_size;
+    int req[100];
+
+    printf("Enter number of requests: ");
+    scanf("%d", &n);
+
+    printf("Enter request sequence: ");
+    for(int i = 0; i < n; i++) {
+        scanf("%d", &req[i]);
+    }
+
+    printf("Enter initial head position: ");
+    scanf("%d", &head);
+
+    printf("\n--- Disk Scheduling Algorithms ---\n");
+    sstf(req, n, head);
+
+
+    return 0;
+}
+
+
+
+
+
+
