@@ -1,0 +1,75 @@
+//process1.c
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+#include <fcntl.h>
+
+int main() {
+    char sentence[200], result[200];
+    int fd1, fd2;
+
+    mkfifo("fifo1", 0666);
+    mkfifo("fifo2", 0666);
+
+    printf("Enter a sentence: ");
+    fgets(sentence, sizeof(sentence), stdin);
+
+    fd1 = open("fifo1", O_WRONLY);
+    write(fd1, sentence, strlen(sentence)+1);
+    close(fd1);
+
+    fd2 = open("fifo2", O_RDONLY);
+    read(fd2, result, sizeof(result));
+    close(fd2);
+
+    printf("\n--- Result received from Process 2 ---\n");
+    printf("%s\n", result);
+
+    return 0;
+}
+
+//process2.c
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+#include <fcntl.h>
+
+int main() {
+    char sentence[200], result[200];
+    int fd1, fd2;
+    int chars = 0, words = 0, lines = 0;
+    FILE *fp;
+
+    mkfifo("fifo1", 0666);
+    mkfifo("fifo2", 0666);
+
+    fd1 = open("fifo1", O_RDONLY);
+    read(fd1, sentence, sizeof(sentence));
+    close(fd1);
+
+    for(int i = 0; sentence[i] != '\0'; i++) {
+        chars++;
+        if(sentence[i] == ' ' || sentence[i] == '\n')
+            words++;
+        if(sentence[i] == '\n')
+            lines++;
+    }
+    words++;
+    lines++;
+
+    fp = fopen("output.txt", "w");
+    fprintf(fp, "Characters: %d\nWords: %d\nLines: %d\n", chars, words, lines);
+    fclose(fp);
+
+    fp = fopen("output.txt", "r");
+    fread(result, sizeof(char), sizeof(result), fp);
+    fclose(fp);
+
+    fd2 = open("fifo2", O_WRONLY);
+    write(fd2, result, strlen(result)+1);
+    close(fd2);
+
+    return 0;
+}
